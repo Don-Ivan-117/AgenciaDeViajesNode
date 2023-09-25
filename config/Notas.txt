@@ -1,0 +1,16 @@
+1.- Importar Sequelize
+2.- instanciar Sequelize. Nota: los primeros 3 parametros que tenemos que pasar en la instancia de Sequelize son:
+    - Nombre de la base de datos a lo que nos queremos conectar (agenciadeviajes)
+    - Nombre del usuario de la base de datos (este se define cuando instalas sql, por defecto es 'root')
+    - Contraseña del usuario de la base de datos (en mi caso no hay)
+Seguido a eso se le debe pasar un objeto con las configuraciones de la instancia de sequelize:
+    - host: Direccion ip del servidor de la base de datos   
+    - port: puerto en el que la base de datos MySQL está escuchando. El valor '3306' es el puerto predeterminado para MySQL.
+    - dialect :  Indica que Sequelize se utilizará con una base de datos MySQL.
+    - define: { timestamps: false }: Esto desactiva la creación automática de campos de timestamp (createdAt y updatedAt) en las tablas de la base de datos. 
+    - pool: configura el pool de conexiones de la base de datos controlando aspactos como:
+        - max: numero maximo de conexiones
+        - min: numero minimo de conexiones
+        - acquire: tiempo maximo de espera para adquirir una conexion
+        - idle: tiempo maximo de inactividad de una conexion
+    - operatorAliases: Esto desactiva el uso de alias de operadores en las consultas de Sequelize. Los alias de operadores son atajos para operadores SQL, y deshabilitarlos puede ser útil para evitar ambigüedades y problemas de seguridad.

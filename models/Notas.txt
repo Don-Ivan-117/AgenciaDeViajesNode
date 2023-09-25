@@ -1,0 +1,10 @@
+Crear un modelo (configuracion)
+
+Creamos una instancia y la exportamos. Dicha instancia usara la conexion ya existene con la base de datos (db)
+ahora con el metodo define() pasaremos como argumento el nombre de la tabla a la cual queremos acceder ('viajes') y como segundo 
+argumento pasaremos un objeto definiendo el nombre de cada columna y el tipo de dato que almacenara. Aspectos a tomar en cuenta:
+    - Cada columna se definira como un objeto individual dentro del mismo objeto que representa el segundo argumento
+    - Se usara la palabra reservada "type" para definir el tipo de dato
+    - Se usara la palabra reservada Sequelize.<Tipo de dato>
+    - El tipo de dato despues de Sequelize. debe ser todo en mayusculas 
+    - En Sequelize STRING reemplaza a VARCHAR Y TEXT de MySQL

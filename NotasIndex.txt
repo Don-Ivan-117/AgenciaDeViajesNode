@@ -1,0 +1,38 @@
+Existen dos formas de importar express a nuestro archivo index:
+    - Forma commom : const express = require('express'); 
+    - Forma import: import express  from 'express';
+      Nota: Al usar la forma expres debemos colocar en el package.json, debajo del objeto de "Scripts" lo siguiente
+      - "type" : "module",
+
+Respuesta al cliente
+    app.get('/', (req, res)=>{
+        res.send('Inicio');
+    });
+
+    - "app.get" : Hace uso de la instancia de express utilizando la funcion get (Obtener valores). 
+    - ('/') : Ruta raiz del sitio web. Osea, que se ejecutara en la pagina principal
+    - (req, res) : req: La informacion que estamos enviando (Nada por ahora). res - Lo que express nos responde
+    - res.send('Inicio') : Envia una respuesta al cliente, En este caso un mensaje. 
+    Nota: Tambien esta res.json({Primero : 1}). Que nos devuelve un Json
+    Y res.render(). Que nos devuelve una vista.
+
+
+-----CARPETA PUBLIC-------
+Para poder agilizar el proceso para estiar nuestrar vistas y templates podemos indicar cual es la carpeta que
+va a contener todos esos estilos. Esto se realiza desde el archivo principal index.js, en el mismo donde creamos la instancia de express
+Debemos usar esa misama instancia junto con el metodo use:
+    - app.use()
+Para el servicio de archivos estáticos como, por ejemplo, imágenes, archivos CSS y archivos JavaScript, utilice la función de middleware incorporado express.static
+    - app.use(express.static());
+Dentro de express.static psamos la carpeta que contenga todos esos archivos, por buenas practicas normalmente se llama "public"
+    - app.use(express.static('public'));
+    Con esto ahora podemos importar estilos e imagenes. Ejemplo (/layout/index.js lineas 7 y 8 ):
+        - link(rel="stylesheet", href="/css/bootstrap.css")
+        - link(rel="stylesheet", href="/css/style.css")
+        - Ambas importaciones en el layout de pug vienen de la carpeta public
+
+-----IMPORTAR FUENTES EXTERNAS---------
+Para importar fuentes externas a traves de link se hace como en html pero con una serie de diferencias:
+    - Seguir la sintaxis de pug
+    - usar un convertor que transforme codigo html a pug
+    - Identar bien. Siguiendo la linea de pertenencia padre hijo.

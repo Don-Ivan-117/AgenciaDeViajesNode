@@ -1,0 +1,127 @@
+Pug tiene su propia sintaxis
+    -La identacion en pug es muy importante
+
+Existen dos formas para recibir variables en pug 
+    p= textoViajes
+    p #{textoViajes}
+    -textoViajes: variable enviada
+Estas variables se envian desde el archivo index.js de la carpeta routes. Estas variables se declaran dentro de cada ruta y se pasan como objetos
+
+Ejemplo: 
+
+router.get("/nosotros", (req, res) => {
+
+  const viajes = "Viaje a Mexico"; ----> Declaramos una variable 
+
+  res.render("nosotros", { textoViajes: viajes });  ------> En el metodo render pasamos el archivo a renderizar y en un objeto todas las variables que queremos enviarle a dicho render.
+});
+
+Ahora en el archivp de 'nosotros' de la carpeta views puede acceder a todas estas variables en el objeto con cualquiera de esats dos formas:
+    p= textoViajes
+    p #{textoViajes}
+    Nota: "p" es solo una etiqueta html puede ser cualquiera
+
+--------LAYOUT--------
+En esta carpeta se guarda todo el contenido que vamos reutilizar en otras vistas (similar a los modulos en ionic)
+    block contenido: declaramos una variable llamada "contenido". Esta variable se usa para indicar cuando sigue contenido aparte de la plantilla (ejemple: navbar que se usa en varias paginas con contenido diferente,  solo requerimos reusar el navbar) 
+
+Para usar dicha plantilla y complementarla con otros archivos primero se debe importar :
+    - extends ./layout/index
+Luego, la variable de block (en este caso se llama contenido pero no importa el nombre):
+    - block contenido
+Luego una identacion del contenido que queremos que se complemente con el template. Es muy importante la identacion para poder saber que cual es el contenido padre y cual es el hijo
+La palabra reservada 'block' junto con la variable deben de ser el contenido padre
+
+-----HEADER Y FOOTER----
+Como su nombre indica son la cabecera y el pie de una pagina. Al igual que con el index en layput podemos mandar a llamar a estos elementos en los archivos que queramos 
+Pero en lugar de block que indica el contenido que se va a recibir mas adelante o con el que se a a completar si usa la palabra reservada "include".
+Ejemplo:
+    include header  ----> Cabecera. Puede ser una navbar o va a ir al inicio de la pagina
+    block contenido ----> Contenido de la pagina.
+    include footer  ----> Pie de la pagina.
+
+Con esto estamos creando una sola pagina pero con la ayuda de 3 archivos distintos. De esta manera podemos tener un solo header y un solo footer y utilizarlos en multiples contenidos
+
+------Escritura de pug--------
+    - Es lo mismo colocar div(class="col-md") a .col-md. Esto es debido a que en pug al colocar solo un punto y la clase da por implicito el div. Usa la que mas te agrade  
+    - Si son varias clases se escribe asi : .row.justify-content-center.justify-content-md-between.align-items-center.py4 .con un punto entre cada clase
+    - Si queremos usar otra etiqueta ademas del div se colo el nombre de la etiqueta, punto y la clase : nav.mt-5.mt-md-0.nav.justify-content-center.justify-content-md-end 
+
+------------PASAR VARIABLES A LAS VISTAS MEDIANTE MIDDLEWARE------
+Las funciones middleware se declaran en el archivo index.js. Mismo donde instanciamos la inicializacion de express
+Las funciones de middleware son funciones que tienen acceso al objeto de solicitud (req), al objeto de respuesta (res) y a la siguiente función de middleware en el ciclo de 
+solicitud/respuestas de la aplicación. La siguiente función de middleware se denota normalmente con una variable denominada next.
+
+En este caso se usa una funcion middleware sin via de acceso de montaje. La funcion se ejecuta cada vez que la aplicacion recibe una solicitud
+    app.use((req, res, next)=>{
+    const year = new Date();
+    res.locals.actualYear = year.getFullYear();
+    return next();
+    });
+
+    - app.use: accedemos a expres y con el metodo "use" especificamos que la peticion pueder ser cualquier verbo HTTP (post, put, delete, get...)
+    - (req, res) : req: La informacion que estamos enviando (Nada por ahora). res - Lo que express nos responde
+    - (, next) : una función que se utiliza para pasar la solicitud al siguiente middleware en la pila 
+    - const year = new Date() : Instanciamos la clase Date;
+    - res.locals.actualYear = year.getFullYear(): Este código agrega una propiedad llamada actualYear al objeto res.locals. res.locals es un objeto especial de Express 
+    que se utiliza para almacenar datos locales que están disponibles en las plantillas de vista o en otros middleware posteriores. En este caso, se almacena el año actual 
+    en la propiedad actualYear de res.locals. (Podemos acceder al contenido de este objeto desde cualquier vista en la caroeta "views" y mediante en nombre de la variable que queramos usar)
+    Nota: la sintaxis es res.locals.<Nombre de la variable> = <Valor de la variable>. En esta caso estamos agregando una variable llamada "actualYear"
+    - return next(): Pasa el control al siguiente middleware en la pila. Esto asegura que la solicitud continúe procesándose después de que este middleware haya agregado el año actual a res.locals
+    Nota: no es de ahuevo usar el return next(); basta con solo usar next(); return se usa cuando se traba el middleware y no quiere avanzar con return forzamos el avance
+
+    Con esto hecho ahora tenemos una variable llamada "actualYear" en el objeto res.locals. Ahora para llamarla basta que desde cualquier archivo pug en la carpeta de views llamemos a la variable con una de las
+    dos formas ya conocidas:
+         p= actualYear
+        p #{actualYear}
+        Ejemplo en el archivo footer.pug linea 10
+
+----PASAR VARIABLES A LAS VISTA DESDE LAS RUTAS (routes/index.js)---------
+Recuerda que para pasar variables desde las rutas es en el 
+    - res.render("viajes"); 
+Aqui ademas de pasar la vista a renderizar podemos pasar un objeto con las variables a las que solo tendra acceso dicha ruta
+    - res.render("viajes", { pagina : 'Viajes' }); 
+Ahora en la vista de "viajes.pug" puedo acceder a la variable "pagina"; 
+
+-----ITERAR UN ARREGLO EN PUG----------
+Iterar un arreglo en pug es similar a Ionic:
+    - each viaje in resultado
+    - each: palabra reservada
+    - viaje: el nombre con el que queremos llamar a cada iteracion
+    - in: palabra reservada
+    - Resultado: El arreglo que queremos iterar
+    Nota: En pug es importante la identacion por lo que todos los elementos que usen el "each viaje in resultado" (por ejemplo) deberan ser hijos de este elemento.
+
+En este caso el arreglo viene desde la base de datos y es enviado desde el controlador bajo el nombre de "resultado":
+    -  res.render("viajes", { pagina : 'Próximos viajes', resultado : viajes }); //Linea 18
+
+----------CREAR UNA VISTA QUE EN LUGAR DE CONSUMIR INFORMACION LA ENVIE (POST)-----------
+Ejemplo (tesmimoniales.pug):
+    - Crear una etiqueta form entre parentesis el method que se usara (para enviar informacion el metodo es POST)
+        - form(action="" method="POST") 
+    -Todos los elementos del formulario deberan de ser hijos de esta etiqueta form de pug
+    -Usar la clase .form-group
+    - colocar un label e un input como hijos de la clase .form-group
+    - El label tendra usara la clase for para sicronizarlo con el input
+    - El input debera contener un id. En pug el id se declara con un # y el nombre del id por ejemplo, #idEjemplo.
+       Ademas de eso el input contrndra el tipo de dato a que almacenara (type), el nombre de la clase (form-control) y un name este name es importante pues es el nombre que se le asignara como atributo al objeto de informacion que enviemos mediante el formulario.
+    - Repetir esto 3 veces (una para nombre, otro para correo y uno para mensaje)
+     Nota: no es necesario siempre usar la etiqueta input, por ejemplo para el campo mensaje se usa la etiqueta textarea
+    - Por ultimo al mismo nivel que la clase .form-group colocar una etiqueta input el atributo type como submit:
+        - input.btn.btn-success.btn-block(type="submit")
+
+------------CONTENIDO OPCIONAL-----------------
+Es en el index.pug donde definimos las partes que conformaran cada vista. Pero esto no significa que todas las paginas deban de seguir esta estructura es decir las tomaran en caso de que las necesiten
+pero no es necesario colocarlas, si se colocan bien si no se colocan tambien esta bien.
+    - El archivo de Inicio.pug es el unico archivo de la vista que hace uso del block "slider" lo que lo diferencia de los demas ya que solo en este archivo es que se manda a llamar 
+
+------INSERTAR UN CONTENIDO HTML---------
+Podemos insertar un archivo HTML o pug en este caso en otro como si de una imagen se tratase, para esto solo debemos usar la palabra reservada "include" seguido de la ruta del documento .pug que queremos agregar
+    - include ./layout/bloques_viajes
+Notas:
+    - Esto se hace para ahorar tiempo. Por ejemplo en este caso tenemos dos archivos que consultan a los viajes dentro de la base de datos "inicio" y "viajes". Entonces para no dar mantenimiento a dos vistas por separado mejor colocar la vista en una plantilla y mandar a 
+      llamar a esa plantilla en los archivos deseados.
+    - Para hacer lo anterior es necesario que ambas consultas a la base de datos se instancien en una variable con el mismo nombre para poder iterar baja un solo nombre clave y evitar confusiones. Ya que las varaibles solo se pueden pasar a una unica vista por lo tamto estas deben compartir nombre (viaje, en este caso) 
+    - Podemos limitar el numero de elementos consultado agredando el atributi limit:
+        const viajes = await  Viaje.findAll({limit: 3});
+    Con esto de todos los elementos dentro de la base de datos solo traera 3, pues ese numero se establecio como liite

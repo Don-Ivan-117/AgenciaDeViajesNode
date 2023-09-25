@@ -1,0 +1,277 @@
+Pasos y notas del curso.
+1.- Crear la carpeta del proyecto
+2.- Crear un package.json en la terminal integrada del proyecto mediante el comando
+    - npm init 
+    -Para esto caso solo rellenaremos los campos "description" y "name", los demas permaneceran con valor por defecto por 
+3.- Instalar express igualmente desde la terminal integrada del proyecto mediante el comando:
+    - npm install express
+Nota: Express es una libreia de produccion es decir, se va a usar una vez el proyecto es desplegado y puesto en produccion
+Nota: Instalar express nos va a generar un archvio package-lock.json (¡¡¡¡¡¡¡¡¡¡¡NUNCA MODIFICAR ESTE ARCHIVO!!!!!)
+
+4.- Instalar nodemon, desde la terminal integrada del proyecto mediante el comando:
+    - npm install --save-dev nodemon
+    - nodemon nos sirve para ver en tiempo real los cambios que hacemos en el proyecto sin la necesidad de apagar y vover a encender el servidor.
+    - Las linea "--save-dev" quiere decir que pese a que la libreria es de desarrollo (no es necesario una vez se despliegue el proyecto) se guarde en el 
+      package.json
+
+5.- Crear un archivo index.js (Especificaciones en el mismo archivo)
+
+6.- En el archivo package.json crearemos un script entre las llaves de la linea 6.
+    "scripts": {
+        "dev": "nodemon index.js"
+    },
+    - "dev" : No es mas que el nombre del script, podemos asignar el nombre que queramos
+    - "nodemon" : Ejecuta el ejecutable de la libreria nodemon (Es el encargado de realizar cambias sin apagar ni encender el servidor)
+    -  "index.js" : Es el archivo sobre el cual va a trabajar nodemon. Donde se visualizaran los cambios
+    - Para arrancar el script es desde la terminal integrada del proyecto, mediante el siguiente comando:
+        - npm run dev
+        - "run": ejecuta cualquier script dentro del package.json que se encuentre dentro del objeto "Scripts"
+        - "dev": es el script que queremos ejecutar (El que creamos nosotros)
+
+7.-Instalar una plantilla
+    - npm install pug (esta es una de muchas plantillas que existen)
+
+8.- Crear una conexion con la base de datos()
+    - Usar algun servidor (el curso recomienda table plus pero opte por XAMPP)
+    - instalar las dependicias de MySQL y Sequelize: 
+        - npm install mysql2 sequelize
+    - Crear una carpeta llamada config
+    - En esa carptea crear un archivo (db.js) con la configuracion de la base de datos. Mas detalles en la nota de ese archivo!!!!!!!!!1
+    -Expartamos todo el archvio db.js con un export default
+    -importamos ese archivo al index principal (donde se instancia express())
+    - Hacemos uso de la instancia (db) para acceder al metodo de autenticacion
+        - db.authenticate()
+    - Eso es una promesa asi que podemos usar then o catch para comprobar su funcionamiento
+        - db.authenticate()
+            .then( () => console.log('Base de datos conectada'))
+            .catch( error => console.log(error))
+
+9.- Crear un modelo
+    - crear una carpeta llamda models
+    - Dentro de esa carpeta crear un archivo llamado Viaje (Nota: empezar el nombre de los modelos por la letra mayuscula)
+    - importar:
+       - import Sequelize  from "sequelize";
+       - import db from '../config/db.js'; .Esto para usar la conexion que ya existe a la base de datos en MySQL (XAMPP)
+    - Mas detalles en la nota del mismo archivo
+
+10.- Crear un controlador
+    - Crear una carpeta llamda controllers
+    - Crear un archivo en esa carpeta llamada paginasController
+    - Dicho archivo archivo solo almacenara el segundo argumento que le pasamos al router.get(). El primero es el nombre de la vista
+    Puedes ver la comparacion del antes y del despues de crear el controlador archivo (forma actual) imagen (forma anterior sin controller)
+    - Esto se hace con la intencion de separar las tareas y obtener un archvi mas limpio
+    - Para poder usar estos segundos arguementos en las rutas debemos instanciar el segundo arguemento individual de cada ruta y exportarlas con la ayuda de un objeto
+    - De ahi resta importar dicho archivo js con los argumentos a las rutas y mandarlos a llamar por su nombre de instancia. 
+
+11.-Consultar la base de datos
+    - Exportar de la carpeta de "Models" la constante "Viaje"
+    Nota: Esta constante contine la informacion guardada en la base de datos
+    - Importar dicha constante en el archvio "controllers"
+    - Instanciar dicha constante a una nueva
+    - Dado que hacer esto cuenta como una promesa (es decir debemos esperar a recibir informacion de la base de datos) debemos usar async await
+      Colocar el async en el controlador de "paginasViajes"
+    - Colocar await en la instancia de la constante "Viaje"
+    - Usar el metodo findAll() para traer todos los registros de la base de datos
+    Nota: Con un console.log() a la instancia de "Viaje" podemos ver en la terminal si esta o no funcionando
+    - Pasar la instancia de "Viaje" (si la conexion fue exitosa se nos arrojara un arreglo) al objeto de variables.
+    Nota: Recuerda que al hacer esto solo le estamos pasando el arreglo a una determinada vista no a todas
+    Nota: Para poder ver el arreglo en el archivo podemos usar p= JSON.stringify(<nombre de la instancia que se paso en el objeto de variables>). Esto convertirar nnuestro array en texto para confirmar que funciona
+    En pug una etiqueta HTML (p) seguido del signo = significa que vamos a operar con codigo JS por lo cual no hay problema en usar estos metodos
+
+12.-Crear rutas con variables
+Aspectos a tomar en cuenta:
+    - En al archivo de "viajes.pug" tenemos un boton con lo siguiente  a(href=`viajes/${viaje.slug}). Esto significa que al presionarlo nos va a redirijir a una nueva pagina con los detalles de cada viaje y donde esta ${viaje.slug} va a colocar viaje-italia, viaje-canada,viaje-grecia,etc, eb la URL.
+    Esto se obtiene del forEach o iteracion que ahi mismo se realizo. Esto forEach se le aplico a todo el arreglo que nos arroja la base de datos 
+1.- Crear una nueva vista que va a guardar la informacion de esos detalles (viaje.pug).
+2.- En el archivo de rutas colocar una ruta que se deriva de la ruta "paginaViajes":
+    - router.get("/viajes/:id", paginaDetalleViaje);
+        - /:id : Los dos puntos significan que vamos a pasar una variable a la ruta para autocompletarla. id es el nombre de la variable en este caso, puede ser cualquiera
+        Nota: la variable que debe autocompletar la ruta son  viaje-italia, viaje-canada,viaje-grecia,etc. Es decir cualquira de los elementos de la columna "slug" de la base de datos 
+        - paginaDetalleViaje: Es el nombre de la constante que debemos colocar el controlador, como apenas la estamos definiendo podemos colocarle cualquier nombre
+3.- En el archivo del controlador (paginasController.js) crear una constante con el nombre que definimos en la ruta (paginaDetalleViaje)
+Dicha constante va a usar informacion de la base de datos por la tanto es necesario usar async await. async (req, res). Dentro de las llaves de la funcion anonima colocar una destructuracion
+    - const {id} = req.params;
+    - id : este es el nombre de la variable que definimos en el archivo de la carpeta "routes". ("/viajes/*-->:id<--*") De tener otro nombre se usaria ese
+    - req.params = Nos ayuda a obtener informacion de la URL. Como se menciona anteriormente en "viajes.pug" hay un boton que al presionarlo nos redirige a http://localhost:4000/viajes/id
+      Por eso con req.params y con la destructuracion obtenemos de esa ruta el elemento o la variable llamada id (viaje-italia, viaje-canada,viaje-grecia,etc).
+    - Como estamos usando promesas lo mas conveniente es usar el try catch. En el catch solo imprimiremos el error en caso de que ocurra:
+        - console.log(error);
+    - En el try creamos una instancia con el nombre de "resultado" y ahi guardaremos nuevamente una consulta a la base de datos:
+         - const resultado = await Viaje
+    - Nuevamente usaremos un metodo de sequeluize. Anteriormente usamos Viaje.findAll() Que nos trae todos los elementos de la base de datos pero esta vez solo queremos los de una solo fila en especifico.
+    Para eso se usa Viaje.findOne:
+        - await Viaje.findOne
+        Esto metodo nos traera la informacion de una sola fila.
+    - A dicho metodo se le deben pasar una serie de argumentos.primero un objeto con un elemento lladamo "where" el cual tendra otro objeto. dicho objeto tendra el nombre de una fila de la base de datos (slug) y la variable a la cual queremos que se asemeje (id):
+        - const resultado = await Viaje.findOne({where : {slug: id}});
+            - Con esta linea de codigo obtendremos los datos de la fila que sea igual a id y este en la columna slug de la base de datos
+            - where: palabra reservada
+            - slug: nombre de la columna de la base de datos, es la misma que usamos en el boton de "viajes.pug" 
+            - id : nombre de la variable. Recuerda que id se acompleta con los elementos de la columna slug de la base de datos con la exepcion de que se rellena segun donde demmos click
+    - De igual forma en el try colocamos el render y pasamos nuestra instancia como variable al objeto de variables de dicha vista.
+        - es.render("viaje", {pagina:"Informacion viaje", viaje : resultado});
+    Ahora en la vista de "viaje.pug" obtendremos solo el objeto de datos con la informacion del destino a donde hallamos dado click. Podemos acceder a dicho objeto mediante el nombre que definimos en el controlador
+    en el objeto de varibles de la vista (viaje). Como es un objeto podemos acceder a sus valores mediante la sintaxis de punto.
+        
+13.- Enviar datos y leerlos
+- Crear una nueva ruta derivada de "testimoniales" ya existente:
+    - router.get("/testimoniales", paginaTestimoniales);
+    - router.post("/testimoniales", guardarTestimoniales); ---->Nueva ruta
+    Notas: 
+        - Esta ruta ahora es derivada ya que la primera ruta te envia a la vista de testimoniales.
+        Mientras que la segunda vista es para enviar informacion del formulario que se encuentra de igual manera en la vista de testimoniales
+        - Dado que la primera ruta solo muestra una vista es que se usa GET pero como la segunda se trata de un envio de datos entonces se usa POST
+
+- Crear un nuevo controlador (testimonialController) con el fin de separar que rutas se encargaran de distintos metodos. paginasController se encarda solo de las rutas que muestran interfacces (GET)
+mientras que este nuevo controlador se encargara de todas aquellas que envien informacion (POST)
+
+- En dicho controlador creamos una variable con el nombre que definimos en la ruta de tipo POST (guardarTestimoniales)
+y colocamos la misma estructura que en cualquier controlador:
+Nota: Como se menciona esta ruta usa del metodo POST por lo que para ver la informacion que enviemos a traves del formulario es atraves del parametro "req" con extension .body
+    - const guardarTestimoniales = (req, res)=>{
+        console.log(req.body); ---> Imprimir en consola la informacion recabada por el formulario
+    }
+Nota2: No olvides exportar esta funcion e  importarla a traves de un objeto en el archivo de rutas para que funcione 
+
+Nota3: Para poder ver el lo que enviamos a traves del formulario en la consola es necesario agregar un body parse en el archivo principal del proyecto (index.js):
+Para agregarlo basta con usa nuestra instancia de app, junto con el metodo "use" nuevamente y le pasamos como argumento a expres:
+    - app.use(express.urlencoded({extended : true}));
+Con esto en el archivo principal ya podremos leer la informacion que enviamos atraves del formulario en la consola.
+
+Ejemplo de destructuracion con la informacion del formulario:
+    - const {nombre, correo, mensaje} = req.body;
+Nota: nombre, correo y mensaje vienen de formulario de testimoniales.pug. Mas especificamente en el input o en textarea donde colocamos el atributo name=""
+
+14.- Validar campos y enviar errores del middleware a la vista (con middleware me refiero a la logica del controlador de testimonialController)
+Nota: Cuando presionamos el boton de "Enviar" en la vista de testimoniales, lo que sucede es que manda la informacion del formulario a traves de un objeto. Es decir nos llega on ubjeto con nada de informacion, poca informacion o todos los campos llenos    
+    - Una vez aplicado un destructuracion al objeto que nos llega:
+        - const {nombre, correo, mensaje} = req.body;
+    - Crear un objeto que va a almacenar los errores (osea que campos vienen rellenados y cuales no)
+        - const errores = [];
+    - Creamos una serie de condiciones que validaran si los elementos de la destructuracion (campos del formulario) vienen vacios o no, con ayuda del meodo trim(elimina espacios vacios al inicio y al final) 
+        - if(nombre.trim()==="")
+        - if(correo.trim()==="")
+        - if(mensaje.trim()==="")
+    - En caso de cumplirse la condicion, añadiremos un objeto al arreglo mediante el metodo push que contendra un mensaje de error:
+        - errores.push({mensaje: 'El Nombre esta vacio'})
+        - errores.push({mensaje: 'El Correo esta vacio'})
+        - errores.push({mensaje: 'El Mensaje esta vacio'})
+
+    - Ahora creamos una nueva condicion la cual comprobara si el arreglo de errores contiene algun elemento (los elementos solo se agregan en caso de que alla un error, osea si un campo del formulario esta vacio).
+        - if(errores.length > 0)
+    - En caso de que sea cierto cargaremos nuevamente la vista de testimonuales pero esta vez pasando el arreglo de errores con los mensajes, de la misma manera pasaremos la informacion del formulario que nos llega. Es decir, a la que le aplicamos la destructuracion
+        - res.render('testimoniales', {
+            pagina : 'Testimoniales',
+            errores,
+            nombre,
+            correo,
+            mensaje
+        })
+    Nota: La razon por la que pasamos los elementos de la destructuracion (los valores del formulario) es debidop a que al enviar la informacion y un campo se encuentre vacio esto reiniciara el formulario eliminando la informacion de los campos que si contenian informacion.
+    para poder guardar los campos que si estaban rellenados basta con ir a la vista (testimoniales.pug) y en los inputs de cada formulario agregar la propiedad value junto con el nombre de la variable=
+        -value = nombre:
+            - input#nombre(type="text", placeholder="Tu Nombre", name="nombre", class="form-control", value = nombre)
+        -value = correo: 
+            - input#correo(type="text", placeholder="Tu Correo", name="correo", class="form-control", value = correo)
+        - En el caso de un textarea este se debera igualar: 
+            - textarea#mensaje(name="mensaje", class="form-control", placeholder="Tu Mensaje", rows=3)= mensaje 
+
+    Nota: Pese a ser la misma vista de "testimoniales" no se comporta de la misma manera que la que esta en la carpeta de "routes". La que esta en la carpeta de routes solo carga la vista del formulario y no hace uso del arreglo de errores
+    La que se declara en el testimonialesController si hace uso del arreglo de errores ademas de usar como variables la informacion pasada en el formulario.
+    En resumen, el que esta en routes solo muestra la vista, el que esta en el testimonialController tambien muestra la vista pero ahora haciendo uso de nuevas variables que antes no estaban y que aparecieron hasta que se envio el formulario.
+
+ 15.- Agregar informacion a la base  de datos
+ En caso de que el formulario pase la validacion entonces se enviar la informacion a la base de datos
+    - crear una nueva tabla en XAMPP que contendra la informacion de los tesminomiales, solo tendra cuatro filas con la siguiente informacion:
+        - id (primary y auto incremental)
+        - nombre
+        - correo 
+        - mensaje
+        Nota: tambien existen las migraciones en express  al igual que laravel pero el curso no aborda eso
+    - crear un nuevo modelo que acceda a la tabla que creamos en XAMPP (models/testimoniales.js)
+    - Dicho modelo tendra la misma estructura que models/Viaje.js: solo que ahora apuntaremos a la tabla de "testimoniales" como primer argumento y para el segundo de nueva cuenta
+      un objeto con el nombre de las columnas en la base de datos osea, nombre, correo y mensaje lo mismito que esta en la base de datos de tesminomiales en XAMPP
+    - Exportamos ese modelo y lo importamos al controlador
+    - Agregar async a la funcion de guardarTestimoniales
+    - En el else agregamos un trycatch en caso de que suceda algun error al pasar la informacion
+        - if(errores.length > 0){
+            //Si no pasa la validacion
+        }else{
+            try{
+
+            }catch (error){
+
+            }
+        }
+    - En el cath solo imprimiremos en error en caso de que suceda:
+        - console.log(error);
+    - En el try aplicamos el await. Esto es debido a que no sabemos cuanto tardara la informacion en agregarse a la base de datos, entonces con el await indicamos que no hara la siguiente operacion hasta que se agregue la informacion
+    - Llamamos a nuestra importacion "Testimonial" (el modelo que se conecta a la base de datos) y con el metodo create le pasamos los elementos que queremos agregar:
+        - await Testimonial.create({
+                nombre,
+                correo,
+                mensaje
+            });
+    - Al hacer esto se agrega la informacion en la base de datos pero la pagina continua cargando para evitar esto podemos usar un redireccionamiento. En este caso como tenemos dos vista de "testimoniales" por asi decirlo una que es GET y la otro POST
+    podemos indicar que nos redirija a la que es GET una vez se halla guardado la informacion en la base de datos, para eso usamos el await.
+        - res.redirect('testimoniales');
+
+16- Acceder a los valores de los "testimoniales guardados en la base  de datos"
+    - importar el modelo de testimoniales en el el controlador de las paginas ("paginasController")
+    - Aplicar asincronia a la pagina de testtimoniales 
+        - const paginaTestimoniales = async (req, res) =>
+    - Colocar un try catch, dentro del try colocar el metodo render y en el catch solo imprimimos el error:
+         try {
+            res.render("testimoniales", { pagina : 'Testimoniales', testimoniales }); 
+         } catch (error) {
+            console.log(error);
+            }
+    - Arriba del render instancia la importacion del modelo de "testimoniales" y con ayuda del metodo findAll() traer toda la informacion de esa tabla en la base de datos y asignarla a la instancia.
+        - const testimoniales = await Testimonial.findAll();
+
+17.- Colocar dos asyncs en un solo middleware
+    - El el middleware de paginaInicio (paginasController, linea 4). Debemos hacer dos consultas a la base de datos una para mostrar los viajes y otra para los testimonios
+      Al tratarse de consultas que no sabemos cuanto tiempo puden tardar en realizarse es que se usa asyn y await para bloquer un momento la ejeucicion hasta completar dicha 
+      consulta.
+        - const resultado = await Viaje.findAll({limit: 3})
+    Eso se haria en caso de una sola consulta pero, como se menciona anteriormente se requieren dos consultas. Lo mas obvio seria crear una nueva consulta, instanciarla y volverla asyncrona
+        - const resultado = await Viaje.findAll({limit: 3})
+        - const resultado = await Testimonial.findAll({limit : 3})
+    
+    Pero esto no es lo correcto ya que se estaria agregando tiempo de espera innecesario a la pagina al detener dos veces la ejecucion. 
+    Nota: Esto si es valido solo que no para este caso, un caso donde si seria valido es si una consulta depende de la otra es decir. Es necesario detener la ejecucion la primera vez para obtner los datos y la segunda para trabajar con esos datos.
+    Pero en este caso ambas consultas son independientes una de la otro por lo que no es necesario que se detenga dos veces la ejecucion.
+
+    - Para ejecutar dos promesas al mismo tiempo (async-await es una promesa) y no agregar tiempo de espera inncesario a la pagina, se usa el metodo all de la clase Promise, en donde se pasan como argumentos las promesas que queremos ejecutar al mismo tiempo
+    Para hacer esto podemos optar por esta opcion:
+        - Crear un arreglo vacio:
+            - const proimiseDB = []; (paginasController, linea: 7)
+        - Hacer un push a dicho arreglo con la informacion de ambas consultas:
+            - proimiseDB.push( Viaje.findAll({limit: 3})); (paginasController, linea: 9)
+            - proimiseDB.push( Testimonial.findAll({limit : 3})); (paginasController, linea: 10)
+        - en el try, usar el metodo all de la clase Primise pasando como argumento el arreglo:
+            - await Promise.all( proimiseDB); (paginasController, linea: 17)
+        - Como lo que estamos ejecutando es un arreglo entonces debemos colocar la posicion en la que se guardo cada promises (0 y 1) y psarlo al arreglo de variables.
+            - viajes: resultado[0], testimoniales: resultado[1]
+        - Nota: Pese a ejecutarse al mismo tiempo sabemos que viajes esta en la posicon 0 y testimonios en la posicion 1 por el orden el que se ejecuto el metodo push en cada uno
+
+------------------------------------------------VARIABLES DE ENTORNO-----------------------------------------------------------------
+Para este punto el proyecto esta finzalizado y ahora prosigue configurar el entorno de displiegue (DEPLOYMENT)
+Las varaibles de entorno funcionan para poder agregar seguridad a nuestro proyecto ya que estas nos ayuda a ocultar los valores de variables importantes, las cuales serian faciles de acceder a por ende ver una vez en el despliegue.
+Podemos usar modulos de dependencias para cargar varaibles de entorno, uno de estos modulos es dotenv. Instalacion:
+    - npm i dotenv
+
+Con esto ya podemos empezar a trabajar con las variables de entorno:
+    - El primer paso importante es crear un archivo en donde guardar dichas variables importantes (nombre de la base de datos, contraseña, usurio, url, etc), puede llevar cualquier nombre pero por protocolo se crea bajo el nombre de ".env"
+    - Por el momento ahi crearemos una variable que guardara el host local donde se ejecuta nuestro proyecto, pero una vez desplegado el proyecto ahi se colocara la url del servidor donde se aloja el proyecto (informacion muy sensible e importante) es por eso que es necesario ocultarlo bajo variables de entorno.
+    - para poder usar dotenv existen dos formas:
+        1ra forma
+        - importar : import  dotenv  from 'dotenv/config';
+        - colocar : dotenv.config()
+        2da forma
+        - importar unicamente: import  dotenv  from 'dotenv/config';
+        - Al hacer esto nos ahorramos el tener que colocar : dotenv.config()
+    - Para acceder a las variables una vez importado dotenv, es mediante la linea: process.env.NombreDELaVariable. Ejemplo:
+        - console.log(process.env.NombreDELaVariable);
+    - Nota: Para acceder a las variables se debera importar en el archivo que se requiera de las variables (como cualquier importacion, pero el curso lo especifica asi que es importante)
+      Ejemplo de esto es el archivo config/db.js donde e lugar de colocar la informacion directa usamos las variables de entorno
